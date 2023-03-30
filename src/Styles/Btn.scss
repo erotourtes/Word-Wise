@@ -1,0 +1,33 @@
+.btn {
+  text-align: center;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 1rem;
+  cursor: pointer;
+  letter-spacing: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: all .5s;
+  max-width: 15rem;
+
+  &:before {
+    content: "";
+    position: absolute;
+    height: 150px;
+    width: 50px;
+    background: #fff;
+    left: -100%;
+    top: -40px;
+    transform: rotate(37deg);
+    transition: all .5s;
+    opacity: 0.3;
+  }
+
+  &:hover:before {
+    left: 120%;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+}
