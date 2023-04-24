@@ -17,8 +17,8 @@ interface Words {
 }
 */
 
-const isRightWordInterface = (wordObj) => 
-  typeof wordObj === "object" && 
+const isRightWordInterface = (wordObj) =>
+  typeof wordObj === "object" &&
   typeof wordObj.word === "string" &&
   Array.isArray(wordObj.definitions) &&
   Array.isArray(wordObj.synonyms) &&
@@ -45,7 +45,11 @@ class ResponseError extends Error {
 const routes = {
   GET: {
     "random-words": ({ count }) => {
-      if (!count) throw new ResponseError("", `Number of words (<count> property) is required\nExample: http://localhost:3000/?type=random-words&count=10`);
+      if (!count)
+        throw new ResponseError(
+          "",
+          `Number of words (<count> property) is required\nExample: http://localhost:3000/?type=random-words&count=10`
+        );
 
       const response = [];
       const len = wordsNames.length;
@@ -61,11 +65,24 @@ const routes = {
   },
   POST: {
     "update-word": ({ body }) => {
-      if (!body || !isRightWordInterface(body)) throw new ResponseError("", "Data is missing or data is not in the right format");
+      if (!body || !isRightWordInterface(body))
+        throw new ResponseError(
+          "",
+          "Data is missing or data is not in the right format"
+        );
       const word = body.word;
 
       data[word] = body;
       console.log("updated:", data[word]);
+
+      fs.writeFile(
+        `${process.cwd()}/data/words1.json`,
+        JSON.stringify(data),
+        "utf-8",
+        () => {
+          console.log("saved words");
+        }
+      ).catch((err) => console.log(err));
       return true;
     },
   },
@@ -76,20 +93,29 @@ const getData = async (req) => {
   for await (const chunk of req) {
     buffer.push(chunk);
   }
-  return Buffer.concat(buffer).toString();
-}
+  const body = Buffer.concat(buffer).toString();
+  return body.length ? body : null;
+};
 
 const port = process.env.PORT || 3000;
-const server = http.createServer(async(req, res) => {
+const server = http.createServer(async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:8000");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   const link = req.url;
   const method = req.method;
   const query = url.parse(link, true).query;
   const body = await getData(req);
 
-  console.log(`link: ${link} ${JSON.stringify(query)} ${body && Object.keys(body) ? "body is not empty" : "body is empty"}`);
-  const dataRecieved = { ...query, body: JSON.parse(body) };
+  console.log(
+    `link: ${link} ${JSON.stringify(query)} ${
+      body && Object.keys(body) ? "body is not empty" : "body is empty"
+    }`
+  );
 
   try {
+    const dataRecieved = { ...query, body: JSON.parse(body) };
     const router = routes[method][query.type];
     const words = router(dataRecieved);
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -99,8 +125,10 @@ const server = http.createServer(async(req, res) => {
     res.statusCode = 400;
     const avaliableRoutes = Object.keys(routes[method]);
     const example = `Example: http://localhost:3000/?type=${avaliableRoutes[0]}`;
-    const msg = `Maybe you meant: ${avaliableRoutes}\nExample: ${example}`
-    res.end(`An error occured\n${err.messageToUser}\n${err.messageToUser ? "" : msg}`);
+    const msg = `Maybe you meant: ${avaliableRoutes}\nExample: ${example}`;
+    res.end(
+      `An error occured\n${err.messageToUser}\n${err.messageToUser ? "" : msg}`
+    );
   }
 });
 
