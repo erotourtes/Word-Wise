@@ -32,7 +32,11 @@ const populateData = async () => {
       phonetics: {},
     };
   }
-  await fs.promises.writeFile(`${process.cwd()}/data/words.json`, JSON.stringify(words), "utf-8");
+  await fs.promises.writeFile(
+    `${process.cwd()}/data/words.json`,
+    JSON.stringify(words),
+    "utf-8"
+  );
 };
 
 const isRightWordInterface = (wordObj) =>
@@ -43,8 +47,7 @@ const isRightWordInterface = (wordObj) =>
   Array.isArray(wordObj.antonyms) &&
   typeof wordObj.phonetics === "object" &&
   typeof wordObj.phonetics.text === "string" &&
-  typeof wordObj.phonetics.audio === "string" &&
-  typeof wordObj.phonetics.source === "string";
+  typeof wordObj.phonetics.audio === "string";
 
 const data = JSON.parse(
   fs.readFileSync(`${process.cwd()}/data/words.json`, "utf-8")
@@ -80,9 +83,25 @@ const routes = {
 
       return response;
     },
+    word: ({ word }) => {
+      if (!word)
+        throw new ResponseError(
+          "",
+          `Word (<word> property) is required\nExample: http://localhost:3000/?type=word&word=hello`
+        );
+
+      const wordObj = data[word];
+      if (!wordObj)
+        throw new ResponseError(
+          "",
+          `Word ${word} is not found in the database`
+        );
+
+      return wordObj;
+    },
   },
   POST: {
-    "update-word": ({ body }) => {
+    word: ({ body }) => {
       if (!body || !isRightWordInterface(body))
         throw new ResponseError(
           "",

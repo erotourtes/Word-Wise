@@ -6,7 +6,7 @@ import { WordI } from "../Interfaces";
 
 
 export default function WordContainers() {
-    const [words, setWords] = useState<{ [key: string]: WordI }>({});
+    const [expandedIndex, setExpanded] = useState(-1);
     const [wordList, setWordList] = useState<WordI[]>([]);
     const [learned, setLearned] = useState<WordI[]>([]);
 
@@ -19,15 +19,12 @@ export default function WordContainers() {
 
         fetch(url, options)
             .then((res) => res.json())
-            .then((data) => {
-                setWordList(data)
-                console.log(data);
-            })
+            .then((data) => { setWordList(data) })
             .catch((err) => console.log(err.message));
     }, []);
 
 
-    const setToLearned = (index: number) => {
+    const setToLearnedList = (index: number) => {
         const newWords = [...wordList];
         const word = newWords[index];
         newWords.splice(index, 1);
@@ -38,7 +35,7 @@ export default function WordContainers() {
         setWordList(newWords);
     }
 
-    const setToDeffault = (index: number) => {
+    const setToLearnList = (index: number) => {
         const newWords = [...learned];
         const word = newWords[index];
 
@@ -57,6 +54,20 @@ export default function WordContainers() {
             setLearned(newWords);
         else
             setWordList(newWords);
+
+
+        // Update word on server
+        const params = new URLSearchParams();
+        params.append("type", "word");
+        const options = {
+            method: "POST",
+            body: JSON.stringify(updatedWord)
+        };
+        const url = `http://localhost:3000/api/?${params.toString()}`;
+        fetch(url, options)
+            .then((res) => res.json())
+            .then((data) => console.log(data))
+            .catch((err) => console.log(err.message));
     }
 
     const transitions = useTransition(wordList, {
@@ -68,26 +79,37 @@ export default function WordContainers() {
         trail: 70,
     })
 
-
     return (
         <div className="space-y-6 ">
+            {
+                wordList.length === 0 && <p> New Words </p>
+            }
             {transitions((style, item, transitionState, index) => (
                 <animated.div style={style}>
                     <WordContainer
                         key={item.word}
                         word={item}
-                        setLearned={() => setToLearned(index)}
-                        setWord={(updatedWord) => setWord(updatedWord, index, false)} />
+                        setLearned={() => setToLearnedList(index)}
+                        setWord={(updatedWord) => setWord(updatedWord, index, false)}
+                        isExpanded={expandedIndex === index}
+                        setExpanded={(toExpand) => setExpanded(toExpand ? index : -1)} />
+
                 </animated.div>
             ))}
+
+            {learned.length !== 0 && <h2 className="text-2xl font-bold text-center"> Learned Words </h2>}
+
             {
                 learned.length > 0 &&
                 learned.map((word, index) => (
                     <WordContainer
                         key={word.word}
                         word={word}
-                        setLearned={() => setToDeffault(index)}
-                        setWord={(updatedWord) => setWord(updatedWord, index, true)} />
+                        setLearned={() => setToLearnList(index)}
+                        setWord={(updatedWord) => setWord(updatedWord, index, true)}
+                        isExpanded={expandedIndex === index + wordList.length}
+                        setExpanded={(toExpand) => setExpanded(toExpand ? index + wordList.length : -1)} />
+
                 ))
             }
         </div>

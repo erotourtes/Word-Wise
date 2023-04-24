@@ -12,6 +12,8 @@ const fetchData = async (word: string): Promise<ServerWord> => {
   const wordData: FetchedWord = data[0];
 
   const phonetics = wordData.phonetics ? wordData.phonetics[0] : { text: "", audio: "" };
+  phonetics.text = phonetics.text || "";
+  phonetics.audio = phonetics.audio || "";
   const definitions = [];
   const synonyms = [];
   const antonyms = [];
@@ -33,8 +35,6 @@ const fetchData = async (word: string): Promise<ServerWord> => {
     antonyms,
   };
 
-  console.log(wordObj)
-
   return wordObj;
 };
 
@@ -42,17 +42,13 @@ interface Props {
   setLearned: () => void,
   word: WordI,
   setWord: (word: WordI) => void,
+  setExpanded: (isExpanded: boolean) => void,
+  isExpanded: boolean,
 }
 
-export default function WordContainer({ word, setLearned, setWord }: Props) {
-  const [expanded, setExpanded] = useState(false);
-  const [discarded, setDiscarded] = useState(word.learned);
-  const isHidden = expanded ? "block" : "hidden";
-  const isDiscarded = discarded ? "brightness-75" : "";
-
-  const makeCollapsed = () => {
-    setDiscarded(!discarded); setExpanded(false);
-  }
+export default function WordContainer({ word, setLearned, setWord,  setExpanded, isExpanded }: Props) {
+  const isHidden = isExpanded ? "block" : "hidden";
+  const isDiscarded = word.learned ? "brightness-75" : "";
 
   const expand = () => {
     if (word.definitions?.length === 0) {
@@ -61,20 +57,18 @@ export default function WordContainer({ word, setLearned, setWord }: Props) {
       });
     }
 
-    setExpanded(!expanded);
+    setExpanded(!isExpanded);
   }
 
-  // fetchData(word.word);
-
   return (
-    <div className={`${isDiscarded} p-5 rounded-lg bg-darken flex flex-col items-center max-w-lg m-auto relative`}>
+    <div className={`${isDiscarded} p-5 rounded-lg bg-darken flex flex-col items-center max-w-lg m-auto relative overflow-x-clip`}>
       <h1 className={`text-center text-5xl mb-4`}>
         {word.word}
       </h1>
-      <Button onClick={expand}>{expanded ? "Hide  " : "Expand"}</Button>
+      <Button onClick={expand}>{isExpanded ? "Hide  " : "Expand"}</Button>
 
       <div className={`flex flex-col absolute left-2 top-2`}>
-        <ShortBtn onClick={() => { makeCollapsed(); setLearned() }}>Done</ShortBtn>
+        <ShortBtn onClick={() => { setExpanded(false); setLearned() }}>Done</ShortBtn>
       </div>
       <div className={`mt-4 ${isHidden} w-full`}>
         <div>Deffinition: {word.definitions?.map((definition, index) =>
