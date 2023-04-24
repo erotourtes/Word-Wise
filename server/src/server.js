@@ -17,6 +17,24 @@ interface Words {
 }
 */
 
+const populateData = async () => {
+  const data = await fs.promises.readFile(
+    `${process.cwd()}/data/words.txt`,
+    "utf-8"
+  );
+  const words = {};
+  for (const word of data.split("\n")) {
+    words[word] = {
+      word,
+      synonyms: [],
+      antonyms: [],
+      definitions: [],
+      phonetics: {},
+    };
+  }
+  await fs.promises.writeFile(`${process.cwd()}/data/words.json`, JSON.stringify(words), "utf-8");
+};
+
 const isRightWordInterface = (wordObj) =>
   typeof wordObj === "object" &&
   typeof wordObj.word === "string" &&
@@ -76,13 +94,13 @@ const routes = {
       console.log("updated:", data[word]);
 
       fs.writeFile(
-        `${process.cwd()}/data/words1.json`,
+        `${process.cwd()}/data/words.json`,
         JSON.stringify(data),
         "utf-8",
         () => {
           console.log("saved words");
         }
-      ).catch((err) => console.log(err));
+      );
       return true;
     },
   },
@@ -139,7 +157,7 @@ server.listen(port, () => {
 process.on("exit", () => {
   console.log("exit");
   fs.writeFile(
-    `${process.cwd()}/data/words.json`,
+    `${process.cwd()}/data/backup.json`,
     JSON.stringify(data),
     "utf-8"
   ).catch((err) => console.log(err));
