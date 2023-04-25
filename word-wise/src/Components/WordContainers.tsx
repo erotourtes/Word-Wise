@@ -1,73 +1,33 @@
 import { useTransition, animated, easings, useSpringRef } from "@react-spring/web";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useReducer } from "react";
 
 import WordContainer from "./WordContainer";
-import { WordI } from "../Utils/Interfaces";
-
+import { ServerWord, WordI } from "../Utils/Interfaces";
+import WordsReducer from "../Reducers/wordsReducer";
+import { fetchRandomWords, updateWordOnServer } from "../Utils/fetchData";
 
 export default function WordContainers() {
     const [expandedIndex, setExpanded] = useState(-1);
-    const [wordList, setWordList] = useState<WordI[]>([]);
-    const [learned, setLearned] = useState<WordI[]>([]);
+    const [listState, dispatch] = useReducer(WordsReducer, { wordList: [], learned: [] });
+    const wordList = listState.wordList;
+    const learned = listState.learned;
 
     useEffect(() => {
-        const params = new URLSearchParams();
-        params.append("count", "10");
-        params.append("type", "random-words");
-        const url = `http://localhost:3000/api/?${params.toString()}`;
-        const options = { method: "GET" };
-
-        fetch(url, options)
-            .then((res) => res.json())
-            .then((data) => { setWordList(data) })
-            .catch((err) => console.log(err.message));
+        fetchRandomWords(10)
+            .then((data =>
+                data.map(word => {
+                    const rightWord: WordI = { ...word, learned: false };
+                    return rightWord;
+                })
+            ))
+            .then((data) => dispatch({ type: "POPULATE_UNLEARNED", items: data }));
     }, []);
 
-
-    const setToLearnedList = (index: number) => {
-        const newWords = [...wordList];
-        const word = newWords[index];
-        newWords.splice(index, 1);
-
-        word.learned = !word.learned;
-        setLearned([...learned, word]);
-
-        setWordList(newWords);
-    }
-
-    const setToLearnList = (index: number) => {
-        const newWords = [...learned];
-        const word = newWords[index];
-
-        word.learned = !word.learned;
-        newWords.splice(index, 1);
-        setWordList([...wordList, word]);
-
-        setLearned(newWords);
-    }
-
+    const setToLearnedList = (index: number) => dispatch({ type: "MOVE_TO_LEARNED", item: listState.wordList[index] });
+    const setToUnlearnedList = (index: number) => dispatch({ type: "MOVE_TO_UNLEARNED", item: listState.learned[index] });
     const setWord = (updatedWord: WordI, index: number, isLearned: boolean) => {
-        const newWords = isLearned ? [...learned] : [...wordList];
-        newWords.splice(index, 1, updatedWord);
-
-        if (isLearned)
-            setLearned(newWords);
-        else
-            setWordList(newWords);
-
-
-        // Update word on server
-        const params = new URLSearchParams();
-        params.append("type", "word");
-        const options = {
-            method: "POST",
-            body: JSON.stringify(updatedWord)
-        };
-        const url = `http://localhost:3000/api/?${params.toString()}`;
-        fetch(url, options)
-            .then((res) => res.json())
-            .then((data) => console.log(data))
-            .catch((err) => console.log(err.message));
+        dispatch({ type: "UPDATE_WORD", item: updatedWord });
+        updateWordOnServer(updatedWord);
     }
 
     const transitions = useTransition(wordList, {
@@ -105,7 +65,7 @@ export default function WordContainers() {
                     <WordContainer
                         key={word.word}
                         word={word}
-                        setLearned={() => setToLearnList(index)}
+                        setLearned={() => setToUnlearnedList(index)}
                         setWord={(updatedWord) => setWord(updatedWord, index, true)}
                         isExpanded={expandedIndex === index + wordList.length}
                         setExpanded={(toExpand) => setExpanded(toExpand ? index + wordList.length : -1)} />
