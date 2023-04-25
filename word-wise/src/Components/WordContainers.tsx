@@ -2,7 +2,7 @@ import { useTransition, animated, easings, useSpringRef } from "@react-spring/we
 import { ReactNode, useState, useEffect } from "react";
 
 import WordContainer from "./WordContainer";
-import { WordI } from "../Interfaces";
+import { WordI } from "../Utils/Interfaces";
 
 
 export default function WordContainers() {
@@ -80,7 +80,7 @@ export default function WordContainers() {
     })
 
     return (
-        <div className="space-y-6 ">
+        <div className="space-y-6 pb-10 ">
             {
                 wordList.length === 0 && <p> New Words </p>
             }
