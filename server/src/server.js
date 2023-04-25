@@ -49,6 +49,17 @@ const isRightWordInterface = (wordObj) =>
   typeof wordObj.phonetics.text === "string" &&
   typeof wordObj.phonetics.audio === "string";
 
+const getNecessaryDataOf = (wordObj) => {
+  const word = {};
+  word.word = wordObj.word;
+  word.definitions = wordObj.definitions;
+  word.synonyms = wordObj.synonyms;
+  word.antonyms = wordObj.antonyms;
+  word.phonetics = wordObj.phonetics;
+
+  return word;
+}
+
 const data = JSON.parse(
   fs.readFileSync(`${process.cwd()}/data/words.json`, "utf-8")
 );
@@ -109,7 +120,7 @@ const routes = {
         );
       const word = body.word;
 
-      data[word] = body;
+      data[word] = getNecessaryDataOf(body);
       console.log("updated:", data[word]);
 
       fs.writeFile(
