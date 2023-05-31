@@ -1,16 +1,13 @@
 import { useTransition, animated, easings, useSpringRef } from "@react-spring/web";
-import { ReactNode, useState, useEffect, useReducer } from "react";
+import { ReactNode, useState, useEffect, useReducer, useRef } from "react";
 
 import WordContainer from "./WordContainer";
 import { ServerWord, WordI } from "../Utils/Interfaces";
 import WordsReducer from "../Reducers/wordsReducer";
 import { fetchRandomWords, updateWordOnServer } from "../Utils/fetchData";
 
-export default function WordContainers() {
-    const [expandedIndex, setExpanded] = useState(-1);
+function useFetch() {
     const [listState, dispatch] = useReducer(WordsReducer, { wordList: [], learned: [] });
-    const wordList = listState.wordList;
-    const learned = listState.learned;
 
     useEffect(() => {
         fetchRandomWords(10)
@@ -20,8 +17,22 @@ export default function WordContainers() {
                     return rightWord;
                 })
             ))
-            .then((data) => dispatch({ type: "POPULATE_UNLEARNED", items: data }));
+            .then((data) => dispatch({ type: "POPULATE_UNLEARNED", items: data }))
+            .catch((err) => {
+                dispatch({ type: "POPULATE_UNLEARNED", items: [
+                    { word: "Error", learned: false },
+                ]}); // just to show something
+            });
     }, []);
+
+    return [listState, dispatch] as const;
+}
+
+export default function WordContainers() {
+    const [expandedIndex, setExpanded] = useState(-1);
+    const [listState, dispatch] = useFetch();
+    const wordList = listState.wordList;
+    const learned = listState.learned;
 
     const setToLearnedList = (index: number) => dispatch({ type: "MOVE_TO_LEARNED", item: listState.wordList[index] });
     const setToUnlearnedList = (index: number) => dispatch({ type: "MOVE_TO_UNLEARNED", item: listState.learned[index] });
