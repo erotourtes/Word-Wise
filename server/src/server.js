@@ -3,6 +3,8 @@ import http from "http";
 import fs from "fs";
 import url from "url";
 
+import { config } from "./config.js";
+
 /*
 interface Words {
   word: string;
@@ -58,7 +60,7 @@ const getNecessaryDataOf = (wordObj) => {
   word.phonetics = wordObj.phonetics;
 
   return word;
-}
+};
 
 const data = JSON.parse(
   fs.readFileSync(`${process.cwd()}/data/words.json`, "utf-8")
@@ -80,7 +82,7 @@ const routes = {
       if (!count)
         throw new ResponseError(
           "",
-          `Number of words (<count> property) is required\nExample: http://localhost:3000/?type=random-words&count=10`
+          `Number of words (<count> property) is required\nExample: http://${config.HOST}:${config.PORT}/?type=random-words&count=10`
         );
 
       const response = [];
@@ -98,7 +100,7 @@ const routes = {
       if (!word)
         throw new ResponseError(
           "",
-          `Word (<word> property) is required\nExample: http://localhost:3000/?type=word&word=hello`
+          `Word (<word> property) is required\nExample: http://${config.HOST}:${config.PORT}/?type=word&word=hello`
         );
 
       const wordObj = data[word];
@@ -145,7 +147,7 @@ const getData = async (req) => {
   return body.length ? body : null;
 };
 
-const port = process.env.PORT || 3000;
+const port = config.PORT || 3000;
 const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:8000");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
@@ -172,7 +174,7 @@ const server = http.createServer(async (req, res) => {
     console.log(err.message, err.messageToUser);
     res.statusCode = 400;
     const avaliableRoutes = Object.keys(routes[method]);
-    const example = `Example: http://localhost:3000/?type=${avaliableRoutes[0]}`;
+    const example = `Example: http://${config.HOST}:${config.PORT}/?type=${avaliableRoutes[0]}`;
     const msg = `Maybe you meant: ${avaliableRoutes}\nExample: ${example}`;
     res.end(
       `An error occured\n${err.messageToUser}\n${err.messageToUser ? "" : msg}`
@@ -180,7 +182,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`Listening on port ${port}`);
 });
 
