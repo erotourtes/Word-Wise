@@ -5,6 +5,9 @@ export const fetchDictionary = async (word: string): Promise<ServerWord> => {
   const data = await fetch(url)
     .then((res) => res.json())
     .catch((err) => console.log("In fetch dictionary", err.message));
+
+  if (!Array.isArray(data)) throw new Error("Word not found");
+
   const wordData: FetchedWord = data[0];
 
   const phonetics = wordData.phonetics ? wordData.phonetics[0] : { text: "", audio: "" };
@@ -38,7 +41,7 @@ export const fetchRandomWords = async (count: number): Promise<ServerWord[]> => 
   const params = new URLSearchParams();
   params.append("count", count.toString());
   params.append("type", "random-words");
-  const url = `http://localhost:3000/api/?${params.toString()}`;
+  const url = `http://192.168.1.108:3000/api/?${params.toString()}`;
   const options = { method: "GET" };
 
   return fetch(url, options)
@@ -53,9 +56,9 @@ export const updateWordOnServer = async (word: ServerWord): Promise<void> => {
             method: "POST",
             body: JSON.stringify(word)
         };
-        const url = `http://localhost:3000/api/?${params.toString()}`;
+        const url = `http://192.168.1.108:3000/api/?${params.toString()}`;
         return fetch(url, options)
             .then((res) => res.json())
-            .then((data) => console.log(data))
+            // .then((data) => console.log(data)) // returns true if successful
             .catch((err) => console.log(err.message));
 }
