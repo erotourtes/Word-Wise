@@ -23,35 +23,35 @@ export default function WordContainer({ word, setLearned, setWord, setExpanded, 
   const [height, setHeight] = useState(0);
 
   // useEffect(() => {
-  // if (word.definitions?.length === 0) {
-  // console.log("making actual request")
-  // fetchDictionary(word.word).then((data) => {
-  //   setWord({ ...data, learned: word.learned });
-  // }).catch((err) => {
-  //   console.log(err.message);
-  // });
-  // }
+  //   if (word.definitions?.length === 0) {
+  //     console.log("making actual request")
+  //     fetchDictionary(word.word).then((data) => {
+  //       setWord({ ...data, learned: word.learned });
+  //     }).catch((err) => {
+  //       console.log(err.message);
+  //     });
+  //   }
   // }, [isExpanded]);
 
   const expand = () => setExpanded(!isExpanded);
 
   const containerStyle = useSpring(
-    { to: { height: !isExpanded ? 138 : height }, config: { duration: 300 } });
-
-  if (word.word == "TEMP") console.log('current', height)
+    {
+      to: { height: !isExpanded ? 138 : 138 + height + 15 }, // TODO: find out 138 in runtime
+      config: { duration: 200, easing: isExpanded ? easings.easeOutQuad : easings.easeInQuad }
+    });
 
   useLayoutEffect(() => {
     setHeight(heightRef.current?.clientHeight || 0);
   }), [isExpanded];
 
-
   return (
     <animated.div
       style={containerStyle}>
       <div
-        ref={heightRef} onMouseEnter={trigger}
+        onMouseEnter={trigger}
         onMouseLeave={trigger}
-        className={`${isDiscarded} text-text p-5 rounded-lg bg-darken flex flex-col items-center max-w-lg m-auto relative overflow-x-clip`}>
+        className={`${isDiscarded} h-full text-text p-5 rounded-lg bg-darken flex flex-col items-center max-w-lg m-auto relative overflow-x-clip`}>
 
         <h1 className={`text-center text-5xl mb-4`}>
           {word.word}
@@ -62,7 +62,9 @@ export default function WordContainer({ word, setLearned, setWord, setExpanded, 
           <ShortBtn onClick={() => { setExpanded(false); setLearned() }}>{word.learned ? "Undo" : "Done"}</ShortBtn>
         </animated.div>
 
-        <div className={`mt-4 ${isHidden} w-full`}>
+        <div
+          ref={heightRef}
+          className={`mt-4 ${isHidden} w-full`}>
           <div>Deffinition: {word.definitions?.map((definition, index) =>
             <p key={definition} className="text-darken-text">{index + 1}) {definition}</p>
           )}</div>
