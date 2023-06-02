@@ -17,6 +17,7 @@ function useFetch() {
                     return rightWord;
                 })
             ))
+            .then((data) => (data.unshift({ word: "TEMP", learned: false }), data))
             .then((data) => dispatch({ type: "POPULATE_UNLEARNED", items: data }))
             .catch((err) => {
                 dispatch({ type: "POPULATE_UNLEARNED", items: [
