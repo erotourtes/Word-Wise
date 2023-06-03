@@ -4,9 +4,8 @@ import {
   ResponseError,
 } from "./Utils.js";
 
-import { data, wordsNames } from "./data.js";
-
 import { config } from "./config.js";
+import data from "./data.js";
 
 const routes = {
   GET: {
@@ -17,16 +16,7 @@ const routes = {
           `Number of words (<count> property) is required\nExample: http://${config.HOST}:${config.PORT}/?type=random-words&count=10`
         );
 
-      const response = [];
-      const len = wordsNames.length;
-      for (let i = 0; i < Math.min(count, len); i++) {
-        const randomIndex = Math.floor(Math.random() * len);
-        const randomWord = wordsNames[randomIndex];
-        const wordObj = data[randomWord];
-        response.push(wordObj);
-      }
-
-      return response;
+      return data.getRandomWords(count);
     },
     word: ({ word }) => {
       if (!word)
@@ -35,7 +25,7 @@ const routes = {
           `Word (<word> property) is required\nExample: http://${config.HOST}:${config.PORT}/?type=word&word=hello`
         );
 
-      const wordObj = data[word];
+      const wordObj = data.getWordByName(word);
       if (!wordObj)
         throw new ResponseError(
           "",
@@ -54,8 +44,8 @@ const routes = {
         );
       const word = body.word;
 
-      data[word] = getNecessaryDataOf(body);
-      console.log("updated:", data[word]);
+      data.updateWord(word, getNecessaryDataOf(body));
+      console.log("updated:", data.getWordByName(word));
 
       fs.writeFile(
         `${process.cwd()}/data/words.json`,

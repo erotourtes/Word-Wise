@@ -1,11 +1,9 @@
-import "./config.js";
+import { config } from "./config.js";
+import data from "./data.js";
+
 import http from "http";
-import fs from "fs";
 import url from "url";
 
-import { data } from "./data.js";
-
-import { config } from "./config.js";
 import routes from "./routes.js";
 
 const getData = async (req) => {
@@ -58,9 +56,5 @@ server.listen(port, "0.0.0.0", () => {
 
 process.on("exit", () => {
   console.log("exit");
-  fs.writeFile(
-    `${process.cwd()}/data/backup.json`,
-    JSON.stringify(data),
-    "utf-8"
-  ).catch((err) => console.log(err));
+  data.save();
 });
