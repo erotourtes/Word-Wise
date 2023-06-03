@@ -52,6 +52,14 @@ class Data {
       response.add(wordObj);
     }
 
+    for (const wordObj of response) {
+      wordObj.timesSent = (wordObj.timesSent || 0) + 1;
+      if (wordObj.timesSent === 1) {
+        delete this.notSentData[wordObj.word];
+        this.sentData[wordObj.word] = wordObj;
+      }
+    }
+
     return Array.from(response);
   }
 
