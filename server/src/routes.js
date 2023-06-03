@@ -50,14 +50,8 @@ const routes = {
       data.updateWord(word, getNecessaryDataOf(body));
       console.log("updated:", data.getWordByName(word));
 
-      fs.writeFile(
-        `${process.cwd()}/data/words.json`,
-        JSON.stringify(data),
-        "utf-8",
-        () => {
-          console.log("saved words");
-        }
-      );
+      data.save()
+
       return true;
     },
   },

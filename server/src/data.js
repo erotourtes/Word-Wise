@@ -73,8 +73,8 @@ class Data {
 
   save() {
     // Violates the single responsibility principle
-    fs.writeFile(
-      `${process.cwd()}/data/backup.json`,
+    fs.promises.writeFile(
+      `${process.cwd()}/data/words.json`,
       JSON.stringify(this.data),
       "utf-8"
     ).catch((err) => console.log(err));

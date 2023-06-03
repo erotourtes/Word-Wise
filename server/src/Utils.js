@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 export class ResponseError extends Error {
   constructor(message, messageToUser = "", status = "400") {
     super(message);
