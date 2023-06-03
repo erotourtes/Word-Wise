@@ -48,7 +48,7 @@ export default function WordContainers() {
     const transitions = useTransition(wordList, {
         from: { opacity: 0, transform: "translateY(100px)" },
         enter: { opacity: 1, transform: "translateY(0px)" },
-        // leave: { opacity: 0, transform: "translateY(5px)", left: 0, position: "absolute", width: "100%" },
+        leave: { opacity: 0, transform: "translateY(15px)", left: 0, position: "absolute", width: "100%" },
         keys: (item) => item.word,
         config: { duration: 250, tension: 220, friction: 24 },
         trail: 70,

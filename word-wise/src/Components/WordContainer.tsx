@@ -22,16 +22,16 @@ export default function WordContainer({ word, setLearned, setWord, setExpanded, 
   const heightRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
 
-  // useEffect(() => {
-  //   if (word.definitions?.length === 0) {
-  //     console.log("making actual request")
-  //     fetchDictionary(word.word).then((data) => {
-  //       setWord({ ...data, learned: word.learned });
-  //     }).catch((err) => {
-  //       console.log(err.message);
-  //     });
-  //   }
-  // }, [isExpanded]);
+  useEffect(() => {
+    if (word.definitions?.length === 0) {
+      console.log("making actual request")
+      fetchDictionary(word.word).then((data) => {
+        setWord({ ...data, learned: word.learned });
+      }).catch((err) => {
+        console.log(err.message);
+      });
+    }
+  }, [isExpanded]);
 
   const expand = () => setExpanded(!isExpanded);
 
