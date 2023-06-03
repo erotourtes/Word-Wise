@@ -8,8 +8,10 @@ import { fetchRandomWords, updateWordOnServer } from "../Utils/fetchData";
 
 function useFetch() {
     const [listState, dispatch] = useReducer(WordsReducer, { wordList: [], learned: [] });
+    const isEmpty = listState.wordList.length === 0;
 
     useEffect(() => {
+        if (!isEmpty) return;
         fetchRandomWords(10)
             .then((data =>
                 data.map(word => {
@@ -17,14 +19,15 @@ function useFetch() {
                     return rightWord;
                 })
             ))
-            .then((data) => (data.unshift({ word: "TEMP", learned: false }), data))
             .then((data) => dispatch({ type: "POPULATE_UNLEARNED", items: data }))
             .catch((err) => {
-                dispatch({ type: "POPULATE_UNLEARNED", items: [
-                    { word: "Error", learned: false },
-                ]}); // just to show something
+                dispatch({
+                    type: "POPULATE_UNLEARNED", items: [
+                        { word: "Error", learned: false },
+                    ]
+                }); // just to show something
             });
-    }, []);
+    }, [isEmpty]);
 
     return [listState, dispatch] as const;
 }
@@ -45,7 +48,7 @@ export default function WordContainers() {
     const transitions = useTransition(wordList, {
         from: { opacity: 0, transform: "translateY(100px)" },
         enter: { opacity: 1, transform: "translateY(0px)" },
-        leave: { opacity: 0, transform: "translateY(-100px)" },
+        // leave: { opacity: 0, transform: "translateY(5px)", left: 0, position: "absolute", width: "100%" },
         keys: (item) => item.word,
         config: { duration: 250, tension: 220, friction: 24 },
         trail: 70,
@@ -53,9 +56,6 @@ export default function WordContainers() {
 
     return (
         <div className="space-y-6 pb-10 ">
-            {
-                wordList.length === 0 && <p> New Words </p>
-            }
             {transitions((style, item, transitionState, index) => (
                 <animated.div style={style}>
                     <WordContainer
@@ -64,7 +64,10 @@ export default function WordContainers() {
                         setLearned={() => setToLearnedList(index)}
                         setWord={(updatedWord) => setWord(updatedWord, index, false)}
                         isExpanded={expandedIndex === index}
-                        setExpanded={(toExpand) => setExpanded(toExpand ? index : -1)} />
+                        setExpanded={(toExpand) => {
+                            if (expandedIndex !== index && expandedIndex !== -1 && !toExpand) { setExpanded(index > expandedIndex ? expandedIndex : expandedIndex - 1); return };
+                            setExpanded(toExpand ? index : -1)
+                        }} />
 
                 </animated.div>
             ))}
