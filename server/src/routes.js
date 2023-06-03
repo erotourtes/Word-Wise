@@ -9,14 +9,17 @@ import data from "./data.js";
 
 const routes = {
   GET: {
-    "random-words": ({ count }) => {
+    "random-words": ({ count, isSent }) => {
       if (!count)
         throw new ResponseError(
           "",
-          `Number of words (<count> property) is required\nExample: http://${config.HOST}:${config.PORT}/?type=random-words&count=10`
+          `Number of words (<count> property) is required\nExample: http://${config.HOST}:${config.PORT}/?type=random-words&count=10&isSent=false`
         );
 
-      return data.getRandomWords(count);
+      count = parseInt(count) || 1;
+      isSent = isSent === "true";
+
+      return data.getRandomWords(count, isSent);
     },
     word: ({ word }) => {
       if (!word)

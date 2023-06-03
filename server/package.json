@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "watch": "nodemon src/server.js"
+    "watch": "nodemon src/server.js",
+    "debug": "nodemon --inspect-brk src/server.js"
   },
   "keywords": [],
   "author": "",

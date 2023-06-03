@@ -12,7 +12,7 @@ interface Words {
     source: string;
   };
 
-  wasSent: boolean;
+  timesSent: number;
 }
 */
 
@@ -25,28 +25,34 @@ class Data {
     const entries = Object.entries(this.data);
 
     this.sentData = Object.fromEntries(
-      entries.filter(([, word]) => word.wasSent)
+      entries.filter(([, word]) => word.timesSent > 0)
     );
     this.notSentData = Object.fromEntries(
-      entries.filter(([, word]) => !word.wasSent)
+      entries.filter(([, word]) => word.timesSent == undefined || word.timesSent === 0)
     );
   }
 
-  get wordsNames() {
-    return Object.keys(this.data);
+  getRandomWords(count, isSent = true) {
+    const data = isSent ? this.sentData : this.notSentData;
+    return this.#getRandomWords(count, data);
   }
 
-  getRandomWords(count) {
-    const response = [];
-    const len = this.wordsNames.length;
-    for (let i = 0; i < Math.min(count, len); i++) {
-      const randomIndex = Math.floor(Math.random() * len);
-      const randomWord = this.wordsNames[randomIndex];
-      const wordObj = this.getWordByName(randomWord);
-      response.push(wordObj);
+  #getRandomWords(count, data) {
+    if (count > 20)
+      throw new Error("Count cannot be more than 20; The algorithm is slow");
+
+    debugger;
+
+    const response = new Set();
+    const entries = Object.entries(data); // TODO
+
+    while (response.size < Math.min(count, entries.length)) {
+      const randomIndex = Math.floor(Math.random() * entries.length);
+      const wordObj = entries[randomIndex][1];
+      response.add(wordObj);
     }
 
-    return response;
+    return Array.from(response);
   }
 
   updateWord(word, newData) {
