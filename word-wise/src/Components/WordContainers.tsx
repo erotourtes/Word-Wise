@@ -24,6 +24,10 @@ function useFetch() {
                 dispatch({
                     type: "POPULATE_UNLEARNED", items: [
                         { word: "Error", learned: false },
+                        { word: "server", learned: false },
+                        { word: "is", learned: false },
+                        { word: "not", learned: false },
+                        { word: "responding", learned: false },
                     ]
                 }); // just to show something
             });
