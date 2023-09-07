@@ -1,5 +1,3 @@
-import fs from "node:fs";
-
 export class ResponseError extends Error {
   constructor(message, messageToUser = "", status = "400") {
     super(message);
@@ -29,24 +27,3 @@ export const getNecessaryDataOf = (wordObj) => {
   return word;
 };
 
-export const populateData = async () => {
-  const data = await fs.promises.readFile(
-    `${process.cwd()}/data/words.txt`,
-    "utf-8"
-  );
-  const words = {};
-  for (const word of data.split("\n")) {
-    words[word] = {
-      word,
-      synonyms: [],
-      antonyms: [],
-      definitions: [],
-      phonetics: {},
-    };
-  }
-  await fs.promises.writeFile(
-    `${process.cwd()}/data/words.json`,
-    JSON.stringify(words),
-    "utf-8"
-  );
-};
