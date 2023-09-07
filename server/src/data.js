@@ -18,9 +18,13 @@ interface Words {
 
 class Data {
   constructor() {
-    this.data = JSON.parse(
-      fs.readFileSync(`${process.cwd()}/data/words.json`, "utf-8")
-    );
+    try {
+      this.data = JSON.parse(
+        fs.readFileSync(`${process.cwd()}/data/words.json`, "utf-8")
+      );
+    } catch (err) {
+      this.data = {};
+    }
 
     const entries = Object.entries(this.data);
 
@@ -28,7 +32,9 @@ class Data {
       entries.filter(([, word]) => word.timesSent > 0)
     );
     this.notSentData = Object.fromEntries(
-      entries.filter(([, word]) => word.timesSent == undefined || word.timesSent === 0)
+      entries.filter(
+        ([, word]) => word.timesSent == undefined || word.timesSent === 0
+      )
     );
   }
 
@@ -73,11 +79,13 @@ class Data {
 
   save() {
     // Violates the single responsibility principle
-    fs.promises.writeFile(
-      `${process.cwd()}/data/words.json`,
-      JSON.stringify(this.data),
-      "utf-8"
-    ).catch((err) => console.log(err));
+    fs.promises
+      .writeFile(
+        `${process.cwd()}/data/words.json`,
+        JSON.stringify(this.data),
+        "utf-8"
+      )
+      .catch((err) => console.log(err));
   }
 }
 
